@@ -1,5 +1,7 @@
 package com.example.uuushiro.akashi;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -43,27 +45,27 @@ public class HomeFragment extends Fragment {
 
     @OnClick(R.id.button_syukkin)
     void clickButtonShukkin() {
-        postTest(SYUKKIN_CODE, "token");
+        postRequest(SYUKKIN_CODE, getApiToken());
     }
 
     @OnClick(R.id.button_taikin)
     void clickButtonTaikin() {
-        postTest(TAIKIN_CODE, "token");
+        postRequest(TAIKIN_CODE, getApiToken());
     }
 
     @OnClick(R.id.button_chokko)
     void clickButtonChokko() {
-        postTest(CHOKKO_CODE, "token");
+        postRequest(CHOKKO_CODE, getApiToken());
     }
 
     @OnClick(R.id.button_chokki)
     void clickButtonChokki() {
-        postTest(CHOKKI_CODE, "token");
+        postRequest(CHOKKI_CODE, getApiToken());
     }
 
     private void getTest() {
         Request request = new Request.Builder()
-                .url("http://weather.livedoor.com/forecast/webservice/json/v1?city=130010")     // 130010->東京
+                .url("http://weather.livedoor.com/forecast/webservice/json/v1?city=130010")
                 .get()
                 .build();
 
@@ -80,11 +82,9 @@ public class HomeFragment extends Fragment {
                 res = response.body().string();
                 try {
                     JSONObject resJson = new JSONObject(res);
-                    JSONArray weathers = resJson.getJSONArray("pinpointLocations");     // 例として "pinpointLocations" を取り出す
-                    JSONObject weather = weathers.getJSONObject(0);                     // 2番目のオブジェクトにアクセスしたい場合は"1"
-                    String description = weather.getString("name");                     // 例として "name" を取り出す
+                    JSONArray weathers = resJson.getJSONArray("pinpointLocations");
+                    JSONObject weather = weathers.getJSONObject(0);
 
-                    // UI反映
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             Log.d("onResponse", res);
@@ -98,7 +98,7 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void postTest(Integer type, String token) {
+    private void postRequest(Integer type, String token) {
         RequestBody formBody = new FormBody.Builder()
                 .add("type", String.valueOf(type))
                 .build();
@@ -124,13 +124,32 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                final String message;
                 res = response.body().string();
-                getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Log.d("onResponse", res);
-                        Toast.makeText(getActivity(), "打刻しました", Toast.LENGTH_LONG).show();
+                try {
+                    JSONObject resJson = new JSONObject(res);
+                    String result = resJson.getString("success");
+                    if (result.equals("true")) {
+                        message = "打刻しました";
+                    } else {
+                        message = resJson.getJSONArray("errors").getJSONObject(0).getString("message");
                     }
-                });
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Log.d("onResponse", res);
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch(JSONException e) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity(), "失敗しました。開発者にお問い合わせ下さい。", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    failMessage();
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -141,5 +160,11 @@ public class HomeFragment extends Fragment {
                 Log.d("failMessage", res);
             }
         });
+    }
+
+    private String getApiToken() {
+        SharedPreferences data = getActivity().getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+        String apiToken = data.getString("ApiToken","" );
+        return apiToken;
     }
 }
