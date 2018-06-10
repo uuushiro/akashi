@@ -1,0 +1,47 @@
+<TableLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="50dp"
+    android:layout_weight="1"
+    app:layout_constraintTop_toTopOf="parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<TableRow
+    android:layout_width="match_parent"
+    android:layout_height="106dp">
+
+    <Button
+        android:id="@+id/button_syukkin"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_weight="1"
+        android:text="出勤" />
+
+    <Button
+        android:id="@+id/button_taikin"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_weight="1"
+        android:text="退勤" />
+</TableRow>
+
+<TableRow
+    android:layout_width="match_parent"
+    android:layout_height="111dp">
+
+    <Button
+        android:id="@+id/button_chokko"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_weight="1"
+        android:text="直行" />
+
+    <Button
+        android:id="@+id/button_chokki"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_weight="1"
+        android:text="直帰" />
+</TableRow>
+
+</TableLayout>
